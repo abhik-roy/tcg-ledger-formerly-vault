@@ -1,0 +1,329 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ACTIVE MODELS — used by live code paths
+// ============================================================================
+
+model User {
+  id            String           @id @default(cuid())
+  password      String
+  email         String           @unique
+  displayName   String?
+  createdAt     DateTime         @default(now())
+  image         String?
+  name          String?
+  updatedAt     DateTime         @default(now()) @updatedAt
+  role          String           @default("USER")
+  permissions   UserPermissions?
+  holdings       Holding[]
+  quantityLogs   quantityLog[]
+  tradeOffers    TradeOffer[]
+
+  @@map("USER")
+}
+
+model UserPermissions {
+  id                    String  @id @default(cuid())
+  userId                String  @unique
+  user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Card catalog price overrides
+  inventoryUpdatePrices Boolean @default(true)
+
+  // Add Cards section (Scryfall/Pokemon import)
+  addCardsAccess        Boolean @default(true)
+
+  @@map("user_permissions")
+}
+
+model Card {
+  id              String   @id @default(cuid())
+  name            String   @db.VarChar(255)
+  set             String   @db.VarChar(255)
+  setName         String   @db.VarChar(255)
+  collectorNumber String   @db.VarChar(64)
+  finish          String   @db.VarChar(32)
+  game            String   @db.VarChar(32)
+  rarity          String   @db.VarChar(32)
+  imageSmall      String?  @db.VarChar(512)
+  imageNormal     String?  @db.VarChar(512)
+  scryfallId      String?  @unique
+  tcgplayerId     String?
+  marketPrice     Int?
+  marketPriceAt   DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  holdings        Holding[]
+  priceLogs       priceLog[]
+
+  @@unique([name, set, collectorNumber, finish], name: "printing_key")
+  @@index([name])
+  @@index([set])
+  @@index([game])
+}
+
+model Holding {
+  id             String   @id @default(cuid())
+  userId         String
+  cardId         String
+  quantity       Int      @default(1)
+  condition      String   @default("NM") @db.VarChar(8)
+  notes          String?  @db.VarChar(512)
+  listedForTrade Boolean  @default(false)
+  listedQuantity  Int      @default(0)
+  askType         String?  @db.VarChar(32)
+  askValue        Int?
+  tradeOffers     TradeOffer[]
+  offeredInTrades TradeOfferCard[] @relation("OfferedInTrades")
+  tradeNotes     String?  @db.VarChar(512)
+  idealQuantity  Int      @default(0)
+  maxQuantity    Int      @default(0)
+  acquiredPrice  Int?
+  acquiredAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card           Card     @relation(fields: [cardId], references: [id], onDelete: Restrict)
+
+  @@unique([userId, cardId, condition], name: "user_printing_condition")
+  @@index([userId])
+  @@index([cardId])
+  @@index([listedForTrade])
+  @@index([userId, listedForTrade])
+}
+
+model TradeOffer {
+  id             String   @id @default(cuid())
+  holdingId      String
+  offerUserId    String
+  cashAmount     Int      @default(0)
+  message        String?  @db.VarChar(512)
+  status         String   @default("pending") @db.VarChar(32)
+  declineMessage String?  @db.VarChar(512)
+  completedAt    DateTime?
+  voidedAt       DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  holding        Holding        @relation(fields: [holdingId], references: [id], onDelete: Cascade)
+  offerUser      User           @relation(fields: [offerUserId], references: [id], onDelete: Cascade)
+  offeredCards   TradeOfferCard[]
+
+  @@index([holdingId])
+  @@index([offerUserId])
+  @@index([status])
+}
+
+model TradeOfferCard {
+  id           String @id @default(cuid())
+  tradeOfferId String
+  holdingId    String
+  quantity     Int
+
+  tradeOffer   TradeOffer @relation(fields: [tradeOfferId], references: [id], onDelete: Cascade)
+  holding      Holding    @relation("OfferedInTrades", fields: [holdingId], references: [id], onDelete: Restrict)
+
+  @@index([tradeOfferId])
+}
+
+model quantityLog {
+  id        Int       @id @default(autoincrement())
+  cardName  String    @map("cardname") @db.VarChar(255)
+  delta     Int
+  user      String    @db.VarChar(255)
+  time      DateTime  @db.Timestamp(6)
+  finish    String?
+  userId    String
+  holdingId String?
+  cardSet   String    @db.VarChar(255)
+  reason    String?   @db.VarChar(255)
+  actorId   String
+
+  owner     User      @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([userId, time(sort: Desc)])
+  @@index([holdingId])
+  @@index([cardName])
+}
+
+model priceLog {
+  id       Int      @id @default(autoincrement())
+  cardname String   @db.VarChar(255)
+  oldPrice Int
+  newPrice Int
+  user     String   @db.VarChar(255)
+  time     DateTime @db.Timestamp(6)
+  cardId   String
+  source   String   @db.VarChar(32)
+
+  card     Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId, time(sort: Desc)])
+  @@index([cardname])
+}
+
+// ============================================================================
+// SHELVED MODELS — referenced only by src/_shelved/**
+// Do not use in new code. To revive the shop, see src/_shelved/README.md.
+// These tables still exist in the DB but are not touched by live code paths.
+// ============================================================================
+
+model legacyInventory {
+  name            String   @db.VarChar(255)
+  set             String   @db.VarChar(255)
+  setname         String   @db.VarChar(255)
+  collectornumber String   @db.VarChar(255)
+  rarity          String   @db.VarChar(255)
+  imagesmall      String?  @db.VarChar(255)
+  imagenormal     String?  @db.VarChar(255)
+  tcgplayerprice  Int?
+  storeprice      Int      @default(0)
+  finish          String?  @db.VarChar(255)
+  game            String?  @db.VarChar(255)
+  quantity        Int      @default(0)
+  createdat       DateTime @default(now()) @db.Timestamp(6)
+  updatedat       DateTime @updatedAt @db.Timestamp(6)
+  id              Int      @id @default(autoincrement())
+  condition       String?  @default("NM") @db.VarChar(255)
+  buyPrice        Int      @default(0)
+  idealQuantity   Int      @default(0)
+  maxQuantity     Int      @default(0)
+
+  orderItems      OrderItem[]
+
+  @@index([name])
+  @@index([setname])
+  @@index([game])
+  @@index([idealQuantity])
+  @@index([game, quantity])
+  @@index([name, set, condition, finish])
+  @@map("inventory")
+}
+
+model StoreSettings {
+  id                    String   @id @default("singleton")
+  storeName             String   @default("TCG Vault")
+  contactEmail          String?
+  posExitPin            String   @default("1234")
+  taxRate               Float    @default(0)
+  currency              String   @default("USD")
+  shippingEnabled       Boolean  @default(true)
+  standardShippingRate  Int      @default(499)
+  expressShippingRate   Int      @default(1499)
+  freeShippingThreshold Int      @default(0)
+  updatedAt             DateTime @updatedAt
+
+  @@map("store_settings")
+}
+
+model Customer {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  password            String
+  firstName           String?
+  lastName            String?
+  passwordResetToken  String?
+  passwordResetExpiry DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  orders              Order[]
+
+  @@map("CUSTOMER")
+}
+
+model Order {
+  id             String          @id @default(cuid())
+  customerEmail  String          @db.VarChar(255)
+  subtotal       Int
+  tax            Int             @default(0)
+  shippingCost   Int             @default(0)
+  totalAmount    Int
+  status         OrderStatus     @default(PENDING)
+  fulfillment    FulfillmentType @default(PICKUP)
+  paymentMethod  String          @default("PAY_IN_STORE")
+  addressLine1   String?
+  addressLine2   String?
+  city           String?
+  state          String?
+  postalCode     String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  carrier        String?
+  shippedAt      DateTime?
+  trackingNumber  String?
+  stripeSessionId       String?   @unique
+  idempotencyKey        String?   @unique
+  customerId            String?
+  emailConfirmationSent Boolean   @default(false)
+  items          OrderItem[]
+  customer       Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([customerEmail])
+  @@index([status])
+  @@index([customerId])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String           @id @default(cuid())
+  orderId       String
+  inventoryId   Int
+  name          String
+  setName       String
+  condition     String
+  finish        String
+  price         Int
+  quantity      Int
+  order         Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  inventoryItem legacyInventory  @relation(fields: [inventoryId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+/// Legacy table — do not drop. Contains 300k card catalog rows.
+model inventory2 {
+  name            String?   @db.VarChar(255)
+  set             String?   @db.VarChar(255)
+  setname         String?   @db.VarChar(255)
+  collectornumber String?   @db.VarChar(255)
+  rarity          String?   @db.VarChar(255)
+  imagesmall      String?   @db.VarChar(255)
+  imagenormal     String?   @db.VarChar(255)
+  tcgplayerprice  Int?
+  storeprice      Int?
+  foiltype        String?   @db.VarChar(255)
+  game            String?   @db.VarChar(255)
+  quantity        Int?
+  createdat       DateTime? @db.Timestamp(6)
+  updatedat       DateTime? @db.Timestamp(6)
+  id              Int?
+  condition       String?   @db.VarChar(255)
+  buyPrice        Int?      @map("buyprice")
+  idealQuantity   Int?      @map("idealquantity")
+  maxQuantity     Int?      @map("maxquantity")
+  tcgplayerid     String?
+
+  @@ignore
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  COMPLETED
+  CANCELLED
+}
+
+enum FulfillmentType {
+  PICKUP
+  SHIPPING
+}

@@ -1,0 +1,82 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: tcg-ledger-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tcg
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: tcg_ledger
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+    networks: [tcg-net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tcg -d tcg_ledger"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: node:22-bookworm-slim
+    container_name: tcg-ledger-app
+    restart: unless-stopped
+    working_dir: /app
+    command: ["sh", "-c", "apt-get update -qq && apt-get install -y -qq openssl > /dev/null 2>&1; node server.js"]
+    environment:
+      DATABASE_URL: postgres://tcg:${POSTGRES_PASSWORD}@postgres:5432/tcg_ledger
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_TRUST_HOST: "true"
+      NEXTAUTH_URL: https://tcg.goonlabs
+      NEXT_PUBLIC_BASE_URL: https://tcg.goonlabs
+      NODEMAILER_HOST: ${NODEMAILER_HOST}
+      NODEMAILER_PORT: ${NODEMAILER_PORT}
+      NODEMAILER_USER: ${NODEMAILER_USER}
+      NODEMAILER_PASS: ${NODEMAILER_PASS}
+      NODEMAILER_FROM: ${NODEMAILER_FROM}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "127.0.0.1:${APP_PORT:-3001}:3000"
+    volumes:
+      - ./app:/app:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [tcg-net]
+
+  app-test:
+    image: node:22-bookworm-slim
+    container_name: tcg-ledger-app-test
+    restart: unless-stopped
+    working_dir: /app
+    command: ["sh", "-c", "apt-get update -qq && apt-get install -y -qq openssl > /dev/null 2>&1; node server.js"]
+    environment:
+      DATABASE_URL: postgres://tcg:${POSTGRES_PASSWORD}@postgres:5432/tcg_ledger_test
+      AUTH_SECRET: ${AUTH_SECRET_TEST:-test-secret-min-32-chars-for-test-env}
+      AUTH_TRUST_HOST: "true"
+      NEXTAUTH_URL: http://localhost:3002
+      NEXT_PUBLIC_BASE_URL: http://localhost:3002
+      NODEMAILER_HOST: ${NODEMAILER_HOST}
+      NODEMAILER_PORT: ${NODEMAILER_PORT}
+      NODEMAILER_USER: ${NODEMAILER_USER}
+      NODEMAILER_PASS: ${NODEMAILER_PASS}
+      NODEMAILER_FROM: ${NODEMAILER_FROM}
+      ADMIN_EMAIL: ${ADMIN_EMAIL}
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "127.0.0.1:${APP_TEST_PORT:-3002}:3000"
+    volumes:
+      - ./app-test:/app:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [tcg-net]
+    profiles: ["test"]
+
+networks:
+  tcg-net:
+    driver: bridge

@@ -1,0 +1,252 @@
+@import "tailwindcss";
+
+/* 1. DEFINE THEME (Maps CSS Vars to Tailwind Classes) */
+@theme {
+  --font-family-sans: var(--font-sans);
+  --font-family-mono: var(--font-mono);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+
+  --radius: 0.5rem;
+}
+
+/* 2. DEFINE VALUES — Collector's Alcove palette */
+:root {
+  /* Z-index scale */
+  --z-modal-base: 40;
+  --z-modal: 50;
+  --z-modal-nested: 60;
+  --z-toast: 70;
+
+  --background: #f5f3ef;
+  --foreground: #1a1816;
+
+  --card: #ffffff;
+  --card-foreground: #1a1816;
+
+  --popover: #ffffff;
+  --popover-foreground: #1a1816;
+
+  --primary: #d4a843;
+  --primary-foreground: #1a1816;
+
+  --secondary: #f0ebe3;
+  --secondary-foreground: #6b5c3e;
+
+  --muted: #ece8e0;
+  --muted-foreground: #7a7268;
+
+  --accent: #2dd4bf;
+  --accent-foreground: #064e3b;
+
+  --destructive: #f87171;
+  --destructive-foreground: #ffffff;
+
+  --success: #2dd4bf;
+  --success-foreground: #064e3b;
+  --warning: #f59e0b;
+  --warning-foreground: #78350f;
+
+  --info: #60a5fa;
+  --info-foreground: #1e3a5f;
+
+  --border: rgba(120, 100, 70, 0.15);
+  --input: rgba(120, 100, 70, 0.15);
+  --ring: #d4a843;
+
+  --sidebar: #f5f3ef;
+  --sidebar-foreground: #1a1816;
+}
+
+/* Dark Mode — warm charcoal */
+.dark {
+  --background: #16171d;
+  --foreground: #e8e4dc;
+
+  --card: #1e1f27;
+  --card-foreground: #e8e4dc;
+
+  --popover: #1e1f27;
+  --popover-foreground: #e8e4dc;
+
+  --primary: #e5b94e;
+  --primary-foreground: #16171d;
+
+  --secondary: #252630;
+  --secondary-foreground: #c9b98a;
+
+  --muted: #252630;
+  --muted-foreground: #9a9489;
+
+  --accent: #2dd4bf;
+  --accent-foreground: #064e3b;
+
+  --destructive: #f87171;
+  --destructive-foreground: #1c1012;
+
+  --success: #2dd4bf;
+  --success-foreground: #064e3b;
+  --warning: #f59e0b;
+  --warning-foreground: #78350f;
+
+  --info: #60a5fa;
+  --info-foreground: #16171d;
+
+  --border: rgba(180, 160, 120, 0.12);
+  --input: rgba(180, 160, 120, 0.12);
+  --ring: #e5b94e;
+
+  --sidebar: #1a1b22;
+  --sidebar-foreground: #e8e4dc;
+}
+
+/* 3. BASE STYLES */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* 4. COMPONENT CLASSES */
+@layer components {
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2 rounded-md text-[13px] font-medium text-foreground/70 hover:bg-primary/10 hover:text-primary transition-all cursor-pointer;
+  }
+  .sidebar-link.active {
+    @apply bg-primary/15 text-primary font-semibold border-l-2 border-primary pl-[10px];
+  }
+  .table-header {
+    @apply px-5 py-3 text-left text-xs font-medium text-muted-foreground bg-muted/50 border-b border-border;
+  }
+  .table-cell {
+    @apply px-5 py-3 text-sm text-foreground/80 border-b border-border;
+  }
+
+  /* Brand gradient — warm amber to gold */
+  .gradient-brand {
+    background: linear-gradient(135deg, var(--primary) 0%, #b8860b 100%);
+  }
+
+  /* Gradient mesh for login background */
+  .gradient-mesh {
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(212, 168, 67, 0.15), transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(229, 185, 78, 0.1), transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(45, 212, 191, 0.08), transparent 50%),
+      var(--background);
+  }
+  .dark .gradient-mesh {
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(229, 185, 78, 0.08), transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(212, 168, 67, 0.06), transparent 50%),
+      radial-gradient(ellipse at 50% 80%, rgba(45, 212, 191, 0.05), transparent 50%),
+      var(--background);
+  }
+
+  /* Subtle page/card radial glow */
+  .gradient-glow {
+    background: radial-gradient(
+      ellipse at 50% 0%,
+      color-mix(in srgb, var(--primary) 8%, transparent),
+      transparent 60%
+    );
+  }
+
+  /* Card glow on hover — warm amber */
+  .card-glow {
+    transition:
+      box-shadow 0.2s ease,
+      transform 0.2s ease;
+  }
+  .card-glow:hover {
+    box-shadow: 0 0 20px rgba(212, 168, 67, 0.15);
+  }
+
+  /* Glass card */
+  .glass {
+    @apply bg-card/80 backdrop-blur-md border border-border/60;
+  }
+  /* Stat number display */
+  .stat-value {
+    @apply text-2xl font-bold tabular-nums text-foreground;
+  }
+  .stat-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-muted-foreground;
+  }
+
+  /* Border opacity utilities */
+  .border-subtle {
+    @apply border-border/50;
+  }
+
+  /* Typographic scale — 11px minimum for accessibility */
+  .text-caption {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+  .text-label {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .text-body {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Game accent colors */
+  .game-accent-magic {
+    @apply border-l-4 border-l-blue-500;
+  }
+  .game-accent-pokemon {
+    @apply border-l-4 border-l-red-500;
+  }
+  .game-accent-yugioh {
+    @apply border-l-4 border-l-purple-500;
+  }
+  .game-accent-lorcana {
+    @apply border-l-4 border-l-indigo-500;
+  }
+  .game-accent-default {
+    @apply border-l-4 border-l-primary;
+  }
+}

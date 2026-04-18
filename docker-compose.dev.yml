@@ -1,0 +1,21 @@
+services:
+  postgres-dev:
+    image: docker.io/library/postgres:16
+    container_name: tcg-ledger-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tcg_dev
+      POSTGRES_PASSWORD: tcg_dev_password
+      POSTGRES_DB: tcg_ledger_dev
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - dev-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tcg_dev -d tcg_ledger_dev"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  dev-postgres-data:

@@ -1,0 +1,2 @@
+cd "$(git rev-parse --show-toplevel)"
+npx --no -- commitlint --edit "$(git rev-parse --git-dir)/COMMIT_EDITMSG"
