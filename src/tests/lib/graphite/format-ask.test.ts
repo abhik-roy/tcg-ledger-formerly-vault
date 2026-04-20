@@ -28,4 +28,7 @@ describe("formatAsk", () => {
   it("falls back to market when market is null in percent mode", () => {
     expect(formatAsk("percent", 95, null)).toBe("95% mkt")
   })
+  it("returns null when custom askType has no askValue (caller renders fallback)", () => {
+    expect(formatAsk("custom", null, 10000)).toBeNull()
+  })
 })

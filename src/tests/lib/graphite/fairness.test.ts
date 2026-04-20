@@ -7,6 +7,11 @@ describe("computeFairness", () => {
     expect(computeFairness(10400, 10000)).toMatchObject({ tone: "fair", label: "Fair trade" })
   })
 
+  it("treats exact ±5% boundaries as fair (inclusive interval)", () => {
+    expect(computeFairness(9500, 10000)).toMatchObject({ tone: "fair" })
+    expect(computeFairness(10500, 10000)).toMatchObject({ tone: "fair" })
+  })
+
   it("returns low when delta is more than 10% below ask", () => {
     const r = computeFairness(8000, 10000)
     expect(r.tone).toBe("low")

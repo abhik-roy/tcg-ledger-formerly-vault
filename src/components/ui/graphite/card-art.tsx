@@ -28,7 +28,14 @@ export function CardArt({ card, size = "md" }: Props) {
     return (
       <div className="sleeve shrink-0 overflow-hidden" style={{ width: w + 8, height: h + 8 }}>
         <div className="w-full h-full relative rounded-[6px] overflow-hidden bg-black">
-          <Image src={src} alt={card.name} fill className="object-cover" unoptimized />
+          <Image
+            src={src}
+            alt={card.name}
+            fill
+            sizes={`${w}px`}
+            className="object-cover"
+            unoptimized
+          />
         </div>
       </div>
     )

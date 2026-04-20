@@ -20,7 +20,7 @@ export function computeFairness(offerTotalCents: number, askCents: number): Fair
   const delta = offerTotalCents - askCents
   const deltaPct = askCents > 0 ? (delta / askCents) * 100 : 0
 
-  if (Math.abs(deltaPct) < 5) {
+  if (Math.abs(deltaPct) <= 5) {
     return {
       tone: "fair",
       label: "Fair trade",
