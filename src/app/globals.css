@@ -672,3 +672,88 @@ body {
     linear-gradient(110deg, transparent 40%, rgba(255, 255, 255, 0.08) 50%, transparent 60%);
   pointer-events: none;
 }
+
+/* ============================================================
+   Login — aurora background + fan float
+   ============================================================ */
+
+.aurora {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  background:
+    radial-gradient(
+      ellipse 60% 50% at 15% 20%,
+      color-mix(in srgb, var(--accent-hot) 18%, transparent) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 85% 80%,
+      color-mix(in srgb, var(--accent-cool) 16%, transparent) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 40% 30% at 75% 15%,
+      color-mix(in srgb, var(--signal-plum) 14%, transparent) 0%,
+      transparent 50%
+    );
+  filter: blur(40px);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+@keyframes aurora-drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(3%, -2%) scale(1.08);
+  }
+}
+
+@keyframes fan-float {
+  0% {
+    transform: translate(var(--fx, 0), var(--fy, 0)) rotateZ(var(--fr, 0deg));
+  }
+  100% {
+    transform: translate(0, -6px) rotateZ(0deg);
+  }
+}
+
+@keyframes card-lift {
+  0% {
+    opacity: 0;
+    transform: perspective(1400px) rotateX(-8deg) translateY(30px) scale(0.94);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(1400px) rotateX(0) translateY(0) scale(1);
+  }
+}
+.anim-card-lift {
+  animation: card-lift 0.55s cubic-bezier(0.15, 0.85, 0.25, 1.05) both;
+}
+
+@keyframes shimmer-sweep {
+  0%,
+  100% {
+    background-position: -120% 0;
+  }
+  50% {
+    background-position: 220% 0;
+  }
+}
+.flow-text {
+  background: linear-gradient(
+    110deg,
+    var(--ink) 0%,
+    var(--ink) 30%,
+    color-mix(in srgb, var(--accent-hot) 80%, var(--ink)) 50%,
+    var(--ink) 70%,
+    var(--ink) 100%
+  );
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-sweep 6s ease-in-out infinite;
+}
