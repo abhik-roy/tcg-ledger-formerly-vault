@@ -276,8 +276,7 @@
     @apply border-border/50;
   }
 
-  /* Transitional utilities — legacy callers on non-redesigned pages.
-     Removed in Phase 9 once every caller migrates to graphite primitives. */
+  /* Transitional — retained for Dashboard cards until that page is redesigned. */
   .card-glow {
     transition:
       box-shadow 0.25s cubic-bezier(0.2, 0.85, 0.25, 1.05),
@@ -288,45 +287,6 @@
     transform: translateY(-2px);
     box-shadow: var(--shadow-card-lift);
     border-color: var(--rule-strong);
-  }
-
-  .gradient-mesh {
-    background:
-      radial-gradient(
-        ellipse 60% 50% at 15% 20%,
-        color-mix(in srgb, var(--accent-hot) 14%, transparent) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 50% 40% at 85% 80%,
-        color-mix(in srgb, var(--accent-cool) 12%, transparent) 0%,
-        transparent 55%
-      ),
-      radial-gradient(
-        ellipse 40% 30% at 75% 15%,
-        color-mix(in srgb, var(--signal-plum) 10%, transparent) 0%,
-        transparent 50%
-      ),
-      var(--bg);
-  }
-  .dark .gradient-mesh {
-    background:
-      radial-gradient(
-        ellipse 60% 50% at 15% 20%,
-        color-mix(in srgb, var(--accent-hot) 10%, transparent) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        ellipse 50% 40% at 85% 80%,
-        color-mix(in srgb, var(--accent-cool) 9%, transparent) 0%,
-        transparent 55%
-      ),
-      radial-gradient(
-        ellipse 40% 30% at 75% 15%,
-        color-mix(in srgb, var(--signal-plum) 8%, transparent) 0%,
-        transparent 50%
-      ),
-      var(--bg);
   }
 
   /* Typographic scale — 11px minimum for accessibility */
