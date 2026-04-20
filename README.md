@@ -58,6 +58,7 @@ Users have an `ADMIN` or `USER` role. `UserPermissions` provides two granular fl
 | `/admin`              | Dashboard with personal and network-wide stats                      |
 | `/admin/collection`   | Your cards, inline editable, ask price controls, CSV export         |
 | `/admin/trade-binder` | Listings across all users with make offer / accept / decline / void |
+| `/admin/inbox`        | Trade offer ledger — incoming, sent, settled                        |
 | `/admin/targets`      | Cards you want, with ideal/max quantities                           |
 | `/admin/add-cards`    | Search the 116K card catalog, add to collection                     |
 | `/admin/ledger`       | Audit log of all quantity and price changes                         |
@@ -140,6 +141,8 @@ npm run lint
 ## Project structure
 
 ```
+design/
+  trade-binder-prototype/   reference design system (Graphite) + trades flow prototype
 prisma/                     schema + migrations
 scripts/                    CLI tools (create-admin, seed-catalog, import-cards, etc.)
 src/
