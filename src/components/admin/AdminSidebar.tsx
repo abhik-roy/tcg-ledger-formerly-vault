@@ -47,6 +47,7 @@ function NavItemRow({
     <Link
       href={item.href}
       onClick={onClick}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
         "flex items-center gap-[10px] w-full px-[10px] py-[7px] mb-px rounded-[var(--radius-sm)] text-[12.5px] relative transition-[background,color] duration-[120ms]",
         isActive ? "font-semibold" : "font-[450]"
