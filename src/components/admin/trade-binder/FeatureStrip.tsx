@@ -52,9 +52,9 @@ export function FeatureStrip({ listing, onOpen, onCreateListing }: Props) {
           </button>
         </div>
         <div>
-          <Eyebrow className="mb-3" style={{ color } as React.CSSProperties}>
-            Today&apos;s headline listing
-          </Eyebrow>
+          <div style={{ color }}>
+            <Eyebrow className="mb-3">Today&apos;s headline listing</Eyebrow>
+          </div>
           <div className="display-lg serif" style={{ marginBottom: 6 }}>
             {card.name}
           </div>
