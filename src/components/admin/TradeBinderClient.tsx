@@ -5,6 +5,7 @@ import type { TradeBinderItemDTO, HoldingDTO } from "@/lib/dtos"
 import { Search, Plus } from "lucide-react"
 import { FILTER_OPTIONS } from "@/lib/constants"
 import { MakeOfferDialog } from "./MakeOfferDialog"
+import { ListingDetailDialog } from "./trade-binder/ListingDetailDialog"
 import { Button } from "@/components/ui/button"
 import { Masthead } from "./trade-binder/Masthead"
 import { FeatureStrip } from "./trade-binder/FeatureStrip"
@@ -25,6 +26,7 @@ export function TradeBinderClient({ listings, currentUserId, myHoldings }: Trade
   const [sortBy, setSortBy] = useState<"new" | "price-high" | "price-low" | "offers">("new")
   const [onlyTradable, setOnlyTradable] = useState(false)
 
+  const [openListing, setOpenListing] = useState<TradeBinderItemDTO | null>(null)
   const [offerListing, setOfferListing] = useState<TradeBinderItemDTO | null>(null)
   const [showOfferDialog, setShowOfferDialog] = useState(false)
 
@@ -73,13 +75,8 @@ export function TradeBinderClient({ listings, currentUserId, myHoldings }: Trade
     )
   }, [filtered, currentUserId])
 
-  // Phase 3 placeholder handlers — will be wired to real dialogs in later phases
   const handleOpenListing = (listing: TradeBinderItemDTO) => {
-    // Phase 4 will open ListingDetailDialog. For now, open Make Offer directly.
-    if (listing.owner.id !== currentUserId) {
-      setOfferListing(listing)
-      setShowOfferDialog(true)
-    }
+    setOpenListing(listing)
   }
   const handleCreateListing = () => {
     // Phase 6 will open CreateListingDialog
@@ -222,6 +219,19 @@ export function TradeBinderClient({ listings, currentUserId, myHoldings }: Trade
           </div>
         </div>
       </div>
+
+      {openListing && (
+        <ListingDetailDialog
+          listing={openListing}
+          currentUserId={currentUserId}
+          onClose={() => setOpenListing(null)}
+          onMakeOffer={() => {
+            setOfferListing(openListing)
+            setShowOfferDialog(true)
+            setOpenListing(null)
+          }}
+        />
+      )}
 
       {/* Make Offer dialog — legacy for now; replaced by wizard in Phase 5 */}
       <MakeOfferDialog
