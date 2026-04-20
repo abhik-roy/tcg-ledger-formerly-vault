@@ -1,0 +1,398 @@
+/* ============================================================
+   Trade Binder — "Graphite" component styles
+   ============================================================ */
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+  border-radius: 10px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--ink-3); background-clip: padding-box; }
+
+/* Resets */
+button { font-family: inherit; cursor: pointer; border: 0; background: transparent; color: inherit; padding: 0; }
+button:disabled { cursor: not-allowed; opacity: 0.45; }
+input, select, textarea { font-family: inherit; color: inherit; }
+input:focus, select:focus, textarea:focus { outline: none; }
+
+/* Surface card — flat, hairline border */
+.surface {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+.surface-flat {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+}
+.surface-sunk {
+  background: var(--bg-sunk);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+/* Card tile — spring hover */
+.tile {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  transition: transform .35s cubic-bezier(.2,.85,.25,1.05), box-shadow .35s cubic-bezier(.2,.85,.25,1.05), border-color .15s;
+  position: relative;
+}
+.tile:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-lift);
+  border-color: var(--rule-strong);
+}
+
+/* Card "sleeve" — skeuomorphic but digital-first, used for card art framing */
+.sleeve {
+  position: relative;
+  border-radius: 10px;
+  padding: 4px;
+  background: linear-gradient(145deg, #1a1a1d 0%, #0a0a0c 100%);
+  box-shadow:
+    0 1px 2px rgba(0,0,0,0.3),
+    0 12px 28px -12px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: transform .5s cubic-bezier(.2,.85,.25,1.05), box-shadow .5s cubic-bezier(.2,.85,.25,1.05);
+  transform-style: preserve-3d;
+}
+.sleeve::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 10px;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.12) 0%,
+    rgba(255,255,255,0) 35%,
+    rgba(255,255,255,0) 65%,
+    rgba(255,255,255,0.06) 100%
+  );
+  mix-blend-mode: screen;
+}
+.sleeve-tilt {
+  transform: perspective(1400px) rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg));
+}
+
+/* Game spine accent — left-edge colored rail */
+.game-spine { position: relative; overflow: hidden; }
+.game-spine::before {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0; left: 0;
+  width: 2px;
+  background: var(--spine, var(--accent-hot));
+  opacity: 0.8;
+}
+
+/* Hairline divider variants */
+.rule { height: 1px; background: var(--rule); border: 0; margin: 0; }
+.rule-strong { height: 1px; background: var(--rule-strong); border: 0; margin: 0; }
+
+/* Text utilities */
+.clamp-1 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+.clamp-2 { overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* Chips — round pill is default; sharp is for data cells */
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.01em;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink-2);
+  white-space: nowrap;
+  line-height: 1.4;
+}
+.chip-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+.chip-sharp { border-radius: var(--radius-sharp); }
+.chip-solid { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.chip-accent { background: var(--accent-hot); color: var(--accent-hot-ink); border-color: var(--accent-hot); }
+
+/* ── Card art — stylized digital, no paper sim ───────────────
+   A "holographic foil" rectangle keyed by game color.
+   ──────────────────────────────────────────────────────────── */
+.card-art-placeholder {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+  background:
+    radial-gradient(ellipse at 25% 15%, color-mix(in srgb, var(--art-color) 55%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 85%, color-mix(in srgb, var(--art-color) 40%, transparent) 0%, transparent 55%),
+    linear-gradient(140deg,
+      color-mix(in srgb, var(--art-color) 18%, #0a0a0c) 0%,
+      color-mix(in srgb, var(--art-color) 8%, #0a0a0c) 50%,
+      color-mix(in srgb, var(--art-color) 22%, #0a0a0c) 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.12);
+}
+.card-art-placeholder::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(115deg, rgba(255,255,255,0.04) 0 1px, transparent 1px 4px),
+    linear-gradient(110deg, transparent 40%, rgba(255,255,255,0.08) 50%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Motion ─────────────────────────────────────────────────── */
+@keyframes slide-up-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop-in {
+  0%   { opacity: 0; transform: scale(0.96) translateY(8px); }
+  60%  { transform: scale(1.01) translateY(-1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes card-lift {
+  0%   { opacity: 0; transform: perspective(1400px) rotateX(-8deg) translateY(30px) scale(0.94); }
+  100% { opacity: 1; transform: perspective(1400px) rotateX(0) translateY(0) scale(1); }
+}
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 60%, transparent); }
+  50%      { box-shadow: 0 0 0 6px color-mix(in srgb, currentColor 0%, transparent); }
+}
+@keyframes shimmer-bg {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.anim-fade { animation: fade-in .24s ease both; }
+.anim-slide { animation: slide-up-in .35s cubic-bezier(.2,.85,.25,1.05) both; }
+.anim-pop { animation: pop-in .32s cubic-bezier(.2,.85,.25,1.1) both; }
+.anim-card-lift { animation: card-lift .55s cubic-bezier(.15,.85,.25,1.05) both; }
+.anim-pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+/* ── Fluid page transitions ─────────────────────────────────── */
+@keyframes page-in {
+  0%   { opacity: 0; transform: translateY(18px) scale(.992); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+@keyframes scrim-in {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to   { opacity: 1; backdrop-filter: blur(18px); }
+}
+@keyframes stagger-in {
+  0%   { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes width-in {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+@keyframes digit-roll {
+  0%   { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes shimmer-sweep {
+  0%, 100% { background-position: -120% 0; }
+  50%      { background-position: 220% 0; }
+}
+
+.anim-page { animation: page-in .55s cubic-bezier(.2,.85,.25,1.02) both; }
+.stagger > * { animation: stagger-in .55s cubic-bezier(.2,.85,.25,1.02) both; opacity: 0; }
+.stagger > *:nth-child(1) { animation-delay: .02s; }
+.stagger > *:nth-child(2) { animation-delay: .08s; }
+.stagger > *:nth-child(3) { animation-delay: .14s; }
+.stagger > *:nth-child(4) { animation-delay: .20s; }
+.stagger > *:nth-child(5) { animation-delay: .26s; }
+.stagger > *:nth-child(6) { animation-delay: .32s; }
+.stagger > *:nth-child(7) { animation-delay: .38s; }
+.stagger > *:nth-child(8) { animation-delay: .44s; }
+.stagger > *:nth-child(9) { animation-delay: .50s; }
+.stagger > *:nth-child(10) { animation-delay: .56s; }
+.anim-width { animation: width-in .8s cubic-bezier(.2,.85,.25,1.02) both; transform-origin: left; }
+
+/* Tabular digit counter — stacks like a Vegas flipboard */
+.digit-stack {
+  display: inline-flex;
+  overflow: hidden;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.digit-stack span {
+  display: inline-block;
+  animation: digit-roll .6s cubic-bezier(.2,.85,.25,1.05) both;
+}
+
+/* Spectral aurora — ambient background gradient that breathes */
+.aurora {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: 0.6;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 20%, color-mix(in srgb, var(--accent-hot) 18%, transparent) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 80%, color-mix(in srgb, var(--accent-cool) 16%, transparent) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 30% at 75% 15%, color-mix(in srgb, var(--signal-plum) 14%, transparent) 0%, transparent 50%);
+  filter: blur(40px);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+@keyframes aurora-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(3%, -2%) scale(1.08); }
+}
+
+/* Flowing gradient text — used in hero heads */
+.flow-text {
+  background: linear-gradient(110deg,
+    var(--ink) 0%,
+    var(--ink) 30%,
+    color-mix(in srgb, var(--accent-hot) 80%, var(--ink)) 50%,
+    var(--ink) 70%,
+    var(--ink) 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer-sweep 6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* Focus ring */
+:focus-visible {
+  outline: 2px solid var(--accent-hot);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Tab — underline style */
+.tab {
+  padding: 10px 2px;
+  font-family: var(--font-sans);
+  font-size: 13px; font-weight: 500;
+  color: var(--ink-3);
+  border-bottom: 1.5px solid transparent;
+  transition: color .15s, border-color .15s;
+  letter-spacing: -0.005em;
+  background: transparent;
+  cursor: pointer;
+}
+.tab:hover { color: var(--ink); }
+.tab.active { color: var(--ink); border-bottom-color: var(--accent-hot); }
+
+/* Input */
+.input {
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  background: var(--surface);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--ink);
+  transition: border-color .15s, box-shadow .15s;
+}
+.input:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink) 10%, transparent);
+}
+.input::placeholder { color: var(--ink-4); }
+
+/* Badge */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+/* Press — inset panel */
+.press {
+  background: var(--bg-sunk);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+/* Sidebar index (small numeral) */
+.sidebar-index {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--ink-4);
+}
+
+/* Asterism */
+.asterism { display: inline-block; color: var(--ink-3); letter-spacing: 0.3em; }
+.asterism::before { content: "∗  ∗  ∗"; }
+
+/* Sparkline-ish ruler — for stat callouts */
+.ruler {
+  height: 2px;
+  background: var(--ink);
+  width: 18px;
+  display: inline-block;
+}
+
+/* Marquee numeral — big serif number for section marks */
+.marquee-no {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 72px;
+  line-height: 0.82;
+  letter-spacing: -0.04em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.marquee-no em {
+  font-style: italic;
+}
+
+/* Live dot — pulsing accent */
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent-hot);
+  color: var(--accent-hot);
+  display: inline-block;
+  animation: pulse-dot 2.4s ease-in-out infinite;
+}
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-sunk) 0%, var(--rule-strong) 50%, var(--bg-sunk) 100%);
+  background-size: 200% 100%;
+  animation: shimmer-bg 1.8s ease-in-out infinite;
+  border-radius: var(--radius-sharp);
+}
+
+/* Kbd shortcut */
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 6px;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-sharp);
+  color: var(--ink-3);
+  background: var(--surface);
+  box-shadow: inset 0 -1px 0 var(--rule);
+}
