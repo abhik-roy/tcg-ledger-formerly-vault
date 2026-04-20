@@ -85,6 +85,7 @@ export type TradeOfferDTO = {
   cardCondition: string
   askPrice: number | null
   offerUser: { id: string; displayName: string | null; email: string }
+  listingOwner?: { id: string; displayName: string | null; email: string }
   cashAmount: number
   offeredCards: TradeOfferCardDTO[]
   offeredCardsValue: number

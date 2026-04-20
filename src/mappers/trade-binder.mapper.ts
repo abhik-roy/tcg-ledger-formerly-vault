@@ -65,6 +65,13 @@ export function toTradeOfferDTO(row: AnyRow): TradeOfferDTO {
       displayName: row.offerUser.displayName ?? null,
       email: row.offerUser.email,
     },
+    listingOwner: row.holding?.user
+      ? {
+          id: row.holding.user.id,
+          displayName: row.holding.user.displayName ?? null,
+          email: row.holding.user.email,
+        }
+      : undefined,
     cashAmount: row.cashAmount,
     offeredCards,
     offeredCardsValue,

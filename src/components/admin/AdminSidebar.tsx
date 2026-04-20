@@ -5,65 +5,115 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useSession, signOut } from "next-auth/react"
 import {
-  Layers,
   LayoutDashboard,
   Library,
-  Settings,
-  ShieldCheck,
-  PlusSquare,
-  History,
   Target,
+  History,
+  PlusSquare,
   Repeat2,
+  Inbox,
+  Users,
+  Settings,
   LogOut,
   Loader2,
   X,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { SectionLabel } from "@/components/ui/graphite"
+import { ThemeToggle } from "@/components/ui/theme-toggle"
 import { getPendingOfferCount } from "@/app/actions/trade-offer"
 
-function NavLink({
-  href,
-  icon: Icon,
-  label,
-  badge,
+interface NavItem {
+  href: string
+  icon: React.ComponentType<{ size?: number; className?: string }>
+  label: string
+  num: string
+  badge?: number
+}
+
+function NavItemRow({
+  item,
   currentPath,
   onClick,
 }: {
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  label: string
-  badge?: string | number
+  item: NavItem
   currentPath: string
   onClick?: () => void
 }) {
-  const isActive = currentPath === href
+  const isActive = currentPath === item.href
+  const Icon = item.icon
+
   return (
     <Link
-      href={href}
+      href={item.href}
       onClick={onClick}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex items-center gap-2.5 px-3 py-2.5 rounded-md text-body font-medium transition-all duration-150 mb-0.5 min-h-[44px]",
-        isActive
-          ? "bg-primary/15 text-primary font-semibold"
-          : "text-foreground/70 hover:bg-primary/10 hover:text-primary"
+        "flex items-center gap-[10px] w-full px-[10px] py-[7px] mb-px rounded-[var(--radius-sm)] text-[12.5px] relative transition-[background,color] duration-[120ms]",
+        isActive ? "font-semibold" : "font-[450]"
       )}
+      style={{
+        color: isActive ? "var(--ink)" : "var(--ink-2)",
+        background: isActive ? "var(--surface)" : "transparent",
+        boxShadow: isActive ? "inset 0 0 0 1px var(--rule-strong)" : "none",
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) (e.currentTarget as HTMLAnchorElement).style.background = "var(--bg-sunk)"
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) (e.currentTarget as HTMLAnchorElement).style.background = "transparent"
+      }}
     >
-      <Icon className="w-4 h-4 shrink-0" />
-      {label}
-      {badge != null && (
-        <span className="ml-auto bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-caption font-bold">
-          {badge}
+      {/* Active rail */}
+      {isActive && (
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: -12,
+            top: "50%",
+            width: 3,
+            height: 16,
+            marginTop: -8,
+            background: "var(--accent-hot)",
+            borderRadius: "0 2px 2px 0",
+          }}
+        />
+      )}
+
+      {/* Numeric prefix */}
+      <span
+        className="font-mono shrink-0"
+        style={{
+          width: 18,
+          fontSize: 9,
+          letterSpacing: "0.18em",
+          color: isActive ? "var(--ink-3)" : "var(--ink-4)",
+        }}
+      >
+        {item.num}
+      </span>
+
+      <Icon size={14} className="shrink-0" />
+
+      <span className="flex-1">{item.label}</span>
+
+      {item.badge != null && item.badge > 0 && (
+        <span
+          className="font-mono font-semibold shrink-0"
+          style={{
+            background: "var(--accent-hot)",
+            color: "var(--accent-hot-ink)",
+            padding: "1px 6px",
+            borderRadius: 999,
+            fontSize: 9,
+            letterSpacing: "0.04em",
+          }}
+        >
+          {item.badge}
         </span>
       )}
     </Link>
-  )
-}
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="px-3 mb-2 text-caption font-bold text-muted-foreground uppercase tracking-widest">
-      {children}
-    </div>
   )
 }
 
@@ -87,9 +137,10 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
   }, [])
 
   const isAdmin = user?.role === "ADMIN"
-  const perms = user?.permissions
+  const canAddCards = isAdmin || !!user?.permissions?.addCardsAccess
 
   const displayName = user?.name || user?.email?.split("@")[0] || "Guest"
+
   const getInitials = () => {
     const source = user?.name || user?.email || "G"
     return source
@@ -104,23 +155,81 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
     if (mobile && onClose) onClose()
   }
 
+  const collectionItems: NavItem[] = [
+    { href: "/admin", icon: LayoutDashboard, label: "Dashboard", num: "01" },
+    { href: "/admin/collection", icon: Library, label: "Collection", num: "02" },
+    { href: "/admin/targets", icon: Target, label: "Targets", num: "03" },
+    { href: "/admin/ledger", icon: History, label: "Ledger", num: "04" },
+    ...(canAddCards
+      ? [{ href: "/admin/add-cards", icon: PlusSquare, label: "Add Cards", num: "05" }]
+      : []),
+  ]
+
+  const exchangeItems: NavItem[] = [
+    {
+      href: "/admin/trade-binder",
+      icon: Repeat2,
+      label: "Trade Binder",
+      num: "06",
+      badge: pendingOffers > 0 ? pendingOffers : undefined,
+    },
+    {
+      href: "/admin/inbox",
+      icon: Inbox,
+      label: "Inbox",
+      num: "07",
+      badge: pendingOffers > 0 ? pendingOffers : undefined,
+    },
+  ]
+
+  const systemItems: NavItem[] = [
+    { href: "/admin/users", icon: Users, label: "Members", num: "08" },
+    { href: "/admin/settings", icon: Settings, label: "Settings", num: "09" },
+  ]
+
   return (
     <aside
-      className={cn(
-        "bg-card border-r border-border flex flex-col h-full shrink-0 z-20",
-        mobile ? "w-[260px]" : "w-[220px]"
-      )}
+      className={cn("flex flex-col h-full shrink-0 z-20", mobile ? "w-[260px]" : "w-[228px]")}
+      style={{
+        background: "var(--bg)",
+        borderRight: "1px solid var(--rule)",
+      }}
     >
-      {/* Logo */}
-      <div className="px-5 pt-5 pb-5 flex items-center gap-3 shrink-0">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-primary-foreground shadow-sm shrink-0">
-          <Layers className="w-4.5 h-4.5" />
-        </div>
-        <span className="font-bold text-base tracking-tight text-foreground">TCG Ledger</span>
+      {/* Wordmark */}
+      <div
+        className="shrink-0 flex items-baseline gap-2"
+        style={{
+          padding: "24px 20px 18px",
+          borderBottom: "1px solid var(--rule)",
+        }}
+      >
+        <span
+          className="serif"
+          style={{
+            fontSize: 26,
+            lineHeight: 0.9,
+            letterSpacing: "-0.025em",
+          }}
+        >
+          Binder
+          <span style={{ color: "var(--accent-hot)", fontStyle: "italic" }}>.</span>
+        </span>
+        <span
+          className="font-mono uppercase"
+          style={{
+            fontSize: 9,
+            letterSpacing: "0.2em",
+            color: "var(--ink-3)",
+          }}
+        >
+          v2.0
+        </span>
+
         {mobile && onClose && (
           <button
             onClick={onClose}
-            className="ml-auto w-9 h-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            className="ml-auto w-9 h-9 flex items-center justify-center rounded-md transition-colors"
+            style={{ color: "var(--ink-3)" }}
             aria-label="Close menu"
           >
             <X className="w-5 h-5" />
@@ -129,112 +238,101 @@ export function AdminSidebar({ mobile, onClose }: AdminSidebarProps) {
       </div>
 
       {/* Nav */}
-      <div className="flex-1 px-3 space-y-5 overflow-y-auto py-1">
-        {/* Collection */}
-        <div>
-          <SectionLabel>Collection</SectionLabel>
-          <NavLink
-            href="/admin"
-            icon={LayoutDashboard}
-            label="Dashboard"
-            currentPath={pathname}
-            onClick={handleNavClick}
-          />
-          <NavLink
-            href="/admin/collection"
-            icon={Library}
-            label="Collection"
-            currentPath={pathname}
-            onClick={handleNavClick}
-          />
-          <NavLink
-            href="/admin/targets"
-            icon={Target}
-            label="Targets"
-            currentPath={pathname}
-            onClick={handleNavClick}
-          />
-          {(isAdmin || perms?.addCardsAccess) && (
-            <NavLink
-              href="/admin/add-cards"
-              icon={PlusSquare}
-              label="Add Cards"
+      <div className="flex-1 overflow-y-auto" style={{ padding: "18px 12px" }}>
+        {/* I · Collection */}
+        <div className="mb-[22px]">
+          <SectionLabel style={{ padding: "0 10px 8px" }}>I · Collection</SectionLabel>
+          {collectionItems.map((item) => (
+            <NavItemRow
+              key={item.href}
+              item={item}
               currentPath={pathname}
               onClick={handleNavClick}
             />
-          )}
-          <NavLink
-            href="/admin/ledger"
-            icon={History}
-            label="Ledger"
-            currentPath={pathname}
-            onClick={handleNavClick}
-          />
-          <NavLink
-            href="/admin/trade-binder"
-            icon={Repeat2}
-            label="Trade Binder"
-            badge={pendingOffers > 0 ? pendingOffers : undefined}
-            currentPath={pathname}
-            onClick={handleNavClick}
-          />
+          ))}
         </div>
 
-        {/* System -- ADMIN only */}
+        {/* II · Exchange */}
+        <div className="mb-[22px]">
+          <SectionLabel style={{ padding: "0 10px 8px" }}>II · Exchange</SectionLabel>
+          {exchangeItems.map((item) => (
+            <NavItemRow
+              key={item.href}
+              item={item}
+              currentPath={pathname}
+              onClick={handleNavClick}
+            />
+          ))}
+        </div>
+
+        {/* III · System — ADMIN only */}
         {isAdmin && (
-          <div>
-            <SectionLabel>System</SectionLabel>
-            <NavLink
-              href="/admin/users"
-              icon={ShieldCheck}
-              label="Users"
-              currentPath={pathname}
-              onClick={handleNavClick}
-            />
-            <NavLink
-              href="/admin/settings"
-              icon={Settings}
-              label="Settings"
-              currentPath={pathname}
-              onClick={handleNavClick}
-            />
+          <div className="mb-[22px]">
+            <SectionLabel style={{ padding: "0 10px 8px" }}>III · System</SectionLabel>
+            {systemItems.map((item) => (
+              <NavItemRow
+                key={item.href}
+                item={item}
+                currentPath={pathname}
+                onClick={handleNavClick}
+              />
+            ))}
           </div>
         )}
       </div>
 
-      {/* User profile */}
-      <div className="p-3 border-t border-border shrink-0">
-        <div className="flex items-center gap-2.5 px-2 py-2 rounded-md">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-label shrink-0">
-            {status === "loading" ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              getInitials()
-            )}
+      {/* Footer */}
+      <div style={{ borderTop: "1px solid var(--rule)" }}>
+        <div className="flex items-center gap-[10px]" style={{ padding: "12px 14px" }}>
+          {/* Avatar */}
+          <div
+            className="shrink-0 rounded-full flex items-center justify-center font-bold"
+            style={{
+              width: 30,
+              height: 30,
+              background: "var(--surface)",
+              border: "1px solid var(--rule-strong)",
+              fontSize: 11,
+              color: "var(--ink-2)",
+            }}
+          >
+            {status === "loading" ? <Loader2 className="w-3 h-3 animate-spin" /> : getInitials()}
           </div>
+
+          {/* User info */}
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-medium truncate text-foreground leading-tight">
-              {status === "loading" ? "Loading..." : displayName}
-            </p>
-            <div className="flex items-center gap-1 mt-0.5">
-              <span
-                className={cn(
-                  "text-[11px] font-bold px-1.5 py-0.5 rounded-full leading-none",
-                  isAdmin
-                    ? "bg-primary/10 text-primary border border-primary/20"
-                    : "bg-warning/10 text-warning border border-warning/20"
-                )}
-              >
-                {isAdmin ? "ADMIN" : "USER"}
-              </span>
+            <div className="font-semibold truncate" style={{ fontSize: 12, color: "var(--ink)" }}>
+              {status === "loading" ? "Loading…" : displayName}
+            </div>
+            <div
+              className="font-mono mt-px"
+              style={{
+                fontSize: 9.5,
+                letterSpacing: "0.06em",
+                color: "var(--ink-3)",
+              }}
+            >
+              {isAdmin ? "ADMIN" : "USER"}
             </div>
           </div>
+
+          {/* Theme toggle */}
+          <ThemeToggle />
+
+          {/* Sign out */}
           <button
             onClick={() => signOut({ callbackUrl: "/admin/login" })}
             title="Sign out"
-            className="w-9 h-9 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors shrink-0"
+            className="flex items-center justify-center rounded-[var(--radius-sm)] transition-colors"
+            style={{
+              width: 28,
+              height: 28,
+              color: "var(--ink-3)",
+              border: "1px solid var(--rule)",
+            }}
+            aria-label="Sign out"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut size={13} />
           </button>
         </div>
       </div>
