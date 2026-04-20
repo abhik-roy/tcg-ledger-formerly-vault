@@ -4,7 +4,7 @@ import { useState, useMemo } from "react"
 import type { TradeBinderItemDTO, HoldingDTO } from "@/lib/dtos"
 import { Search, Plus } from "lucide-react"
 import { FILTER_OPTIONS } from "@/lib/constants"
-import { MakeOfferDialog } from "./MakeOfferDialog"
+import { MakeOfferWizard } from "./trade-binder/MakeOfferWizard"
 import { ListingDetailDialog } from "./trade-binder/ListingDetailDialog"
 import { Button } from "@/components/ui/button"
 import { Masthead } from "./trade-binder/Masthead"
@@ -233,16 +233,18 @@ export function TradeBinderClient({ listings, currentUserId, myHoldings }: Trade
         />
       )}
 
-      {/* Make Offer dialog — legacy for now; replaced by wizard in Phase 5 */}
-      <MakeOfferDialog
-        listing={offerListing}
-        open={showOfferDialog}
-        onClose={() => {
-          setShowOfferDialog(false)
-          setOfferListing(null)
-        }}
-        myHoldings={myHoldings}
-      />
+      {offerListing && (
+        <MakeOfferWizard
+          listing={offerListing}
+          currentUserId={currentUserId}
+          myHoldings={myHoldings}
+          open={showOfferDialog}
+          onClose={() => {
+            setShowOfferDialog(false)
+            setOfferListing(null)
+          }}
+        />
+      )}
     </div>
   )
 }
