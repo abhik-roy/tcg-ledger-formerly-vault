@@ -147,6 +147,14 @@ export class TradeOfferRepository {
     })
   }
 
+  static async findByHoldingId(holdingId: string) {
+    return prisma.tradeOffer.findMany({
+      where: { holdingId },
+      select: OFFER_SELECT,
+      orderBy: { createdAt: "desc" },
+    })
+  }
+
   static async countPendingOnUserListings(userId: string): Promise<number> {
     return prisma.tradeOffer.count({
       where: {

@@ -439,6 +439,23 @@ export async function voidOffer(offerId: string): Promise<ActionResult<TradeOffe
 }
 
 /**
+ * Get all offers on a specific listing.
+ * Anyone can view; the DTO mapper scrubs anything sensitive.
+ */
+export async function getOffersForListing(
+  holdingId: string
+): Promise<ActionResult<TradeOfferDTO[]>> {
+  await requireUser()
+  try {
+    const rows = await TradeOfferRepository.findByHoldingId(holdingId)
+    return { success: true, data: rows.map(toTradeOfferDTO) }
+  } catch (error) {
+    console.error("Get Offers For Listing Error:", error)
+    return { success: false, error: (error as Error).message }
+  }
+}
+
+/**
  * Get all outgoing offers made by the current user.
  */
 export async function getMyOffers(): Promise<ActionResult<TradeOfferDTO[]>> {
