@@ -6,6 +6,7 @@ import { Search, Plus } from "lucide-react"
 import { FILTER_OPTIONS } from "@/lib/constants"
 import { MakeOfferWizard } from "./trade-binder/MakeOfferWizard"
 import { ListingDetailDialog } from "./trade-binder/ListingDetailDialog"
+import { CreateListingDialog } from "./trade-binder/CreateListingDialog"
 import { Button } from "@/components/ui/button"
 import { Masthead } from "./trade-binder/Masthead"
 import { FeatureStrip } from "./trade-binder/FeatureStrip"
@@ -29,6 +30,7 @@ export function TradeBinderClient({ listings, currentUserId, myHoldings }: Trade
   const [openListing, setOpenListing] = useState<TradeBinderItemDTO | null>(null)
   const [offerListing, setOfferListing] = useState<TradeBinderItemDTO | null>(null)
   const [showOfferDialog, setShowOfferDialog] = useState(false)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   const filtered = useMemo(() => {
     let result = listings
@@ -79,8 +81,7 @@ export function TradeBinderClient({ listings, currentUserId, myHoldings }: Trade
     setOpenListing(listing)
   }
   const handleCreateListing = () => {
-    // Phase 6 will open CreateListingDialog
-    alert("Create listing dialog lands in Phase 6.")
+    setShowCreateDialog(true)
   }
 
   return (
@@ -243,6 +244,14 @@ export function TradeBinderClient({ listings, currentUserId, myHoldings }: Trade
             setShowOfferDialog(false)
             setOfferListing(null)
           }}
+        />
+      )}
+
+      {showCreateDialog && (
+        <CreateListingDialog
+          open={showCreateDialog}
+          onClose={() => setShowCreateDialog(false)}
+          myHoldings={myHoldings}
         />
       )}
     </div>
