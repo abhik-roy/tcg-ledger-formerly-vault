@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     "scripts/**",
     // Shelved shop/stripe/pos code — excluded from lint
     "src/_shelved/**",
+    // Reference prototype — not application code, not shipped
+    "design/**",
   ]),
   {
     rules: {
