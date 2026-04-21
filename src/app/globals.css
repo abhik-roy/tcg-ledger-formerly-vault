@@ -693,6 +693,18 @@ body {
   animation: card-lift 0.55s cubic-bezier(0.15, 0.85, 0.25, 1.05) both;
 }
 
+/* Continuous Y-axis rotation for the feature card.
+   Paired with transform-style: preserve-3d on the spinner and
+   backface-visibility on front/back faces. */
+@keyframes card-spin {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
 @keyframes shimmer-sweep {
   0%,
   100% {
