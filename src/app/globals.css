@@ -705,6 +705,31 @@ body {
   }
 }
 
+/* Ledger row — soft hover tint + colored left rail that fades in on hover.
+   Rail color set per-row via `--rail-color` custom property. */
+.ledger-row {
+  position: relative;
+}
+.ledger-row::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--rail-color, transparent);
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+}
+.ledger-row:hover::before {
+  opacity: 1;
+}
+.ledger-row:hover {
+  background: var(--bg-sunk);
+}
+
 @keyframes shimmer-sweep {
   0%,
   100% {
