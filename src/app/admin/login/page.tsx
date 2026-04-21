@@ -1,124 +1,26 @@
 "use client"
 
 import { useState, Suspense } from "react"
+import dynamic from "next/dynamic"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { AlertCircle, Eye, EyeOff, CheckCircle2, ArrowRight } from "lucide-react"
 import { registerUser } from "@/app/actions/register"
 import { Eyebrow } from "@/components/ui/graphite"
 
+// WebGL card — client-only, avoids SSR hydration mismatch.
+const RotatingCard = dynamic(
+  () => import("@/components/login/RotatingCard").then((m) => m.RotatingCard),
+  { ssr: false, loading: () => null }
+)
+
 // ── Sub-components ────────────────────────────────────────────
 
-function FanCard({
-  offset,
-  hue,
-  delay,
-  primary,
-}: {
-  offset: number
-  hue: number
-  delay: number
-  primary?: boolean
-}) {
-  const deg = offset * 8
-  const x = offset * 44
-  const y = Math.abs(offset) * 14
-  const titles = [
-    "Blacklotus",
-    "Pikachu · Illustrator",
-    "Dark Magician",
-    "Ursula Holo",
-    "Serra Angel",
-  ]
-  const codes = ["LEA · 001", "PRO · P05", "LOB · 000", "ROF · 188", "2ED · 021"]
-  const idx = Math.abs(offset) % 5
-  return (
-    <div
-      style={{
-        position: "absolute",
-        left: "50%",
-        top: "50%",
-        width: 220,
-        height: 308,
-        marginLeft: -110,
-        marginTop: -154,
-        transform: `translate(${x}px, ${y}px) rotateZ(${deg}deg) rotateY(${offset * -2}deg)`,
-        transformOrigin: "center 85%",
-        zIndex: primary ? 10 : 5 - Math.abs(offset),
-        borderRadius: 14,
-        background: `linear-gradient(145deg, hsl(${hue}, 18%, 14%) 0%, hsl(${hue}, 22%, 8%) 100%)`,
-        boxShadow: primary
-          ? "0 30px 60px -20px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08), inset 0 1px 0 rgba(255,255,255,.1)"
-          : "0 12px 24px -8px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.04)",
-        animation: `card-lift .8s cubic-bezier(.15,.85,.25,1.05) both ${delay}s, fan-float 8s ease-in-out infinite alternate ${delay}s`,
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          inset: 10,
-          borderRadius: 8,
-          border: "1px solid rgba(255,255,255,.1)",
-          background: `radial-gradient(ellipse at 30% 20%, hsla(${hue}, 70%, 60%, .45) 0%, transparent 55%), radial-gradient(ellipse at 80% 85%, hsla(${hue}, 60%, 40%, .35) 0%, transparent 55%)`,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <div
-          style={{
-            padding: "8px 12px",
-            fontFamily: "var(--font-sans)",
-            fontSize: 12,
-            fontWeight: 600,
-            color: "rgba(255,255,255,.9)",
-            letterSpacing: "-0.01em",
-            borderBottom: "1px solid rgba(255,255,255,.12)",
-            background: `linear-gradient(180deg, hsla(${hue}, 70%, 50%, .3), transparent)`,
-          }}
-        >
-          {titles[idx]}
-        </div>
-        <div style={{ flex: 1, display: "grid", placeItems: "center" }}>
-          <svg
-            width="70"
-            height="70"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="rgba(255,255,255,.85)"
-            strokeWidth="1"
-            opacity="0.9"
-          >
-            <path d="M12 2 L4 8 L4 16 L12 22 L20 16 L20 8 Z" />
-          </svg>
-        </div>
-        <div
-          style={{
-            padding: "6px 12px",
-            fontFamily: "var(--font-mono)",
-            fontSize: 9,
-            letterSpacing: "0.1em",
-            color: "rgba(255,255,255,.55)",
-            textTransform: "uppercase",
-            borderTop: "1px solid rgba(255,255,255,.08)",
-          }}
-        >
-          {codes[idx]}
-        </div>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          background:
-            "linear-gradient(110deg, transparent 40%, rgba(255,255,255,.13) 50%, transparent 60%)",
-          mixBlendMode: "screen",
-        }}
-      />
-    </div>
-  )
-}
+const BLACK_LOTUS_PNG =
+  "https://cards.scryfall.io/png/front/b/0/b0faa7f2-b547-42c4-a810-839da50dadfe.png?1559591477"
+
+const MTG_CARD_BACK =
+  "https://backs.scryfall.io/normal/0/a/0aeebaf5-8c7d-4636-9e82-8c27447861f7.jpg"
 
 function SpinnerDots() {
   return (
@@ -244,105 +146,62 @@ function AuthForm() {
       >
         <div className="aurora" />
 
-        {/* Wordmark + meta */}
-        <div className="absolute top-8 left-10 right-10 z-[2] flex justify-between items-baseline">
+        {/* Wordmark only (meta label removed) */}
+        <div className="absolute top-8 left-10 right-10 z-[2]">
           <span
-            className="serif"
-            style={{ fontSize: 28, letterSpacing: "-0.025em", lineHeight: 0.9 }}
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontWeight: 800,
+              fontSize: 24,
+              letterSpacing: "-0.035em",
+              lineHeight: 1,
+              color: "var(--ink)",
+            }}
           >
-            Binder<span style={{ color: "var(--accent-hot)", fontStyle: "italic" }}>.</span>
-          </span>
-          <span
-            className="font-mono uppercase"
-            style={{ fontSize: 10, letterSpacing: "0.2em", color: "var(--ink-3)" }}
-          >
-            Edition 12 · Winter
+            TCGLedger<span style={{ color: "var(--accent-hot)" }}>.</span>
           </span>
         </div>
 
-        {/* Card cascade */}
-        <div
-          className="absolute inset-0 grid place-items-center z-[1]"
-          style={{ perspective: 1400 }}
-        >
-          <div className="relative anim-card-lift" style={{ width: 440, height: 460 }}>
-            <FanCard offset={-2} hue={220} delay={0.0} />
-            <FanCard offset={-1} hue={12} delay={0.08} />
-            <FanCard offset={0} hue={280} delay={0.16} primary />
-            <FanCard offset={1} hue={160} delay={0.24} />
-            <FanCard offset={2} hue={45} delay={0.32} />
+        {/* 3D rotating card — WebGL via React Three Fiber */}
+        <div className="absolute inset-0 grid place-items-center z-[1]">
+          <div className="anim-card-lift" style={{ width: 520, height: 600 }}>
+            <RotatingCard frontUrl={BLACK_LOTUS_PNG} backUrl={MTG_CARD_BACK} speed={0.35} />
           </div>
         </div>
 
         {/* Tagline */}
-        <div className="absolute bottom-10 left-10 right-10 z-[2] anim-slide flex items-end gap-6">
-          <div className="flex-1">
-            <Eyebrow className="mb-2.5">Self-hosted · Tailnet trading</Eyebrow>
-            <div
-              className="serif"
-              style={{
-                fontSize: "clamp(30px, 3vw, 44px)",
-                lineHeight: 1.05,
-                letterSpacing: "-0.025em",
-                maxWidth: 460,
-              }}
-            >
-              Every card has a{" "}
-              <span className="serif-italic" style={{ color: "var(--accent-hot)" }}>
-                story
-              </span>
-              .<br />
-              The ledger remembers it.
-            </div>
+        <div className="absolute bottom-10 left-10 right-10 z-[2] anim-slide">
+          <div
+            style={{
+              fontFamily: "var(--font-sans)",
+              fontWeight: 800,
+              fontSize: "clamp(22px, 2vw, 32px)",
+              lineHeight: 1.15,
+              letterSpacing: "-0.025em",
+              maxWidth: 520,
+              color: "var(--ink)",
+            }}
+          >
+            A self-hosted collection management and trading system.
           </div>
         </div>
       </aside>
 
       {/* RIGHT: form */}
       <div className="flex flex-col px-14 py-12 relative overflow-y-auto">
-        {/* Top meta */}
-        <div className="flex justify-end anim-fade">
-          <div
-            className="font-mono uppercase flex items-center gap-2"
-            style={{
-              fontSize: 10,
-              letterSpacing: "0.16em",
-              color: "var(--ink-3)",
-            }}
-          >
-            <span className="live-dot" />
-            Ledger · synced now
-          </div>
-        </div>
-
         <div className="flex-1 flex flex-col justify-center max-w-[440px] anim-fade">
-          <div className="mb-4">
-            <Eyebrow>Sign in · No. 01</Eyebrow>
-          </div>
-
           <h1
-            className="serif"
             style={{
-              fontSize: "clamp(40px, 4.2vw, 60px)",
-              fontWeight: 400,
-              letterSpacing: "-0.03em",
+              fontFamily: "var(--font-sans)",
+              fontSize: "clamp(44px, 5.2vw, 72px)",
+              fontWeight: 800,
+              letterSpacing: "-0.035em",
               lineHeight: 0.95,
-              margin: "0 0 16px 0",
+              margin: "0 0 18px 0",
+              color: "var(--ink)",
             }}
           >
-            {mode === "login" ? (
-              <>
-                Welcome
-                <br />
-                <span className="serif-italic flow-text">back to the binder.</span>
-              </>
-            ) : (
-              <>
-                Pull up a
-                <br />
-                <span className="serif-italic flow-text">new binder.</span>
-              </>
-            )}
+            {mode === "login" ? "This is TCGLedger" : "Join TCGLedger"}
           </h1>
 
           <p
@@ -506,11 +365,11 @@ function AuthForm() {
               {loading ? (
                 <>
                   <SpinnerDots />
-                  <span>{mode === "login" ? "Opening the binder…" : "Creating account…"}</span>
+                  <span>{mode === "login" ? "Signing in…" : "Creating account…"}</span>
                 </>
               ) : (
                 <>
-                  {mode === "login" ? "Enter the binder" : "Create account"}
+                  {mode === "login" ? "Sign in" : "Create account"}
                   <ArrowRight className="w-4 h-4" strokeWidth={2} />
                 </>
               )}
@@ -538,15 +397,6 @@ function AuthForm() {
               </button>
             </span>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div
-          className="flex justify-between items-center font-mono uppercase"
-          style={{ fontSize: 10.5, color: "var(--ink-3)", letterSpacing: "0.08em" }}
-        >
-          <span>Self-hosted on your Tailnet</span>
-          <span>Escrowed · Insured · Audited</span>
         </div>
       </div>
     </div>

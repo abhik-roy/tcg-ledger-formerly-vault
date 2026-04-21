@@ -23,7 +23,7 @@ const securityHeaders = [
       // Styles: self + inline (required by Tailwind / shadcn)
       "style-src 'self' 'unsafe-inline'",
       // Images: self + Scryfall + PokémonTCG CDNs + data URIs
-      "img-src 'self' data: https://cards.scryfall.io https://images.pokemontcg.io",
+      "img-src 'self' data: https://cards.scryfall.io https://backs.scryfall.io https://images.pokemontcg.io",
       // Fonts: self
       "font-src 'self'",
       // Frames: none needed
@@ -43,6 +43,10 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "cards.scryfall.io",
+      },
+      {
+        protocol: "https",
+        hostname: "backs.scryfall.io",
       },
       {
         protocol: "https",
