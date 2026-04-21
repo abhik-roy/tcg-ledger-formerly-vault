@@ -132,27 +132,33 @@ function AuthForm() {
 
   return (
     <div
-      className="fixed inset-0 overflow-hidden lg:grid"
+      className="fixed inset-0 overflow-y-auto lg:overflow-hidden flex flex-col lg:grid"
       style={{
         background: "var(--bg)",
         gridTemplateColumns: "1.15fr 1fr",
         color: "var(--ink)",
       }}
     >
-      {/* LEFT: ambient stage */}
+      {/* LEFT/TOP: ambient stage — full-height panel on desktop, shorter hero
+          strip on mobile above the form. Uses flex column so the wordmark,
+          card, and tagline stack predictably without absolute positioning. */}
       <aside
-        className="relative overflow-hidden hidden lg:block"
-        style={{ background: "var(--bg-sunk)", borderRight: "1px solid var(--rule)" }}
+        className="relative overflow-hidden shrink-0 h-[400px] sm:h-[480px] lg:h-auto flex flex-col"
+        style={{
+          background: "var(--bg-sunk)",
+          borderBottom: "1px solid var(--rule)",
+          borderRight: "none",
+        }}
       >
         <div className="aurora" />
 
-        {/* Wordmark only (meta label removed) */}
-        <div className="absolute top-8 left-10 right-10 z-[2]">
+        {/* Wordmark */}
+        <div className="relative z-[2] px-6 pt-6 lg:px-10 lg:pt-8">
           <span
             style={{
               fontFamily: "var(--font-sans)",
               fontWeight: 800,
-              fontSize: 24,
+              fontSize: 22,
               letterSpacing: "-0.035em",
               lineHeight: 1,
               color: "var(--ink)",
@@ -162,15 +168,15 @@ function AuthForm() {
           </span>
         </div>
 
-        {/* 3D rotating card — WebGL via React Three Fiber */}
-        <div className="absolute inset-0 grid place-items-center z-[1]">
-          <div className="anim-card-lift" style={{ width: 520, height: 600 }}>
+        {/* 3D rotating card — fills the middle of the aside at all sizes */}
+        <div className="relative flex-1 grid place-items-center z-[1] min-h-0">
+          <div className="anim-card-lift w-[260px] h-[300px] sm:w-[360px] sm:h-[420px] lg:w-[520px] lg:h-[600px]">
             <RotatingCard frontUrl={BLACK_LOTUS_PNG} backUrl={MTG_CARD_BACK} speed={0.35} />
           </div>
         </div>
 
-        {/* Tagline */}
-        <div className="absolute bottom-10 left-10 right-10 z-[2] anim-slide">
+        {/* Tagline — hidden on mobile (card is the hero); shows on lg+ */}
+        <div className="hidden lg:block relative z-[2] px-10 pb-10 anim-slide">
           <div
             style={{
               fontFamily: "var(--font-sans)",
@@ -187,8 +193,8 @@ function AuthForm() {
         </div>
       </aside>
 
-      {/* RIGHT: form */}
-      <div className="flex flex-col px-14 py-12 relative overflow-y-auto">
+      {/* BOTTOM/RIGHT: form */}
+      <div className="flex flex-col px-6 py-10 sm:px-14 sm:py-12 relative lg:overflow-y-auto">
         <div className="flex-1 flex flex-col justify-center max-w-[440px] anim-fade">
           <h1
             style={{
